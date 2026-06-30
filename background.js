@@ -40,6 +40,39 @@ async function getState() {
   };
 }
 
+// Convert user-entered exceptions into valid Chrome bypass patterns.
+// Handles entries like "https://ozon.ru/path", "www.ozon.ru", "ozon.ru".
+// For a bare domain we add both the domain AND a wildcard for subdomains.
+function normalizeBypass(list) {
+  const out = new Set();
+  (list || []).forEach((raw) => {
+    let e = String(raw).trim();
+    if (!e) return;
+    // strip scheme
+    e = e.replace(/^[a-z0-9]+:\/\//i, "");
+    // strip path / query / hash
+    e = e.split(/[/?#]/)[0];
+    // strip leading dots
+    e = e.replace(/^\.+/, "");
+    if (!e) return;
+
+    // keep special tokens, CIDR, IP, and already-wildcarded entries as-is
+    const isSpecial = e === "<local>";
+    const isWildcard = e.startsWith("*");
+    const isCidr = e.includes("/");
+    const isIp = /^[0-9.:]+$/.test(e);
+    const hasPort = /:\d+$/.test(e);
+
+    out.add(e);
+
+    if (!isSpecial && !isWildcard && !isCidr && !isIp && !hasPort) {
+      // also match all subdomains: ozon.ru -> *.ozon.ru
+      out.add("*." + e);
+    }
+  });
+  return Array.from(out);
+}
+
 function buildConfig(proxy, bypassList) {
   const scheme = mapScheme(proxy.type);
   const single = {
@@ -47,11 +80,12 @@ function buildConfig(proxy, bypassList) {
     host: proxy.host,
     port: Number(proxy.port)
   };
+  const normalized = normalizeBypass(bypassList);
   return {
     mode: "fixed_servers",
     rules: {
       singleProxy: single,
-      bypassList: bypassList && bypassList.length ? bypassList : DEFAULT_BYPASS
+      bypassList: normalized.length ? normalized : DEFAULT_BYPASS
     }
   };
 }

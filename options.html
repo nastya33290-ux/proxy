@@ -71,7 +71,7 @@
 
     <section class="card">
       <h2>Исключения (bypass)</h2>
-      <p class="hint">Эти адреса будут открываться напрямую, минуя прокси. По одному правилу на строку. Поддерживаются домены, IP, маски: <code>*.example.com</code>, <code>192.168.0.0/16</code>, <code>&lt;local&gt;</code>.</p>
+      <p class="hint">Эти адреса будут открываться напрямую, минуя прокси. По одному правилу на строку. Можно вставлять с http(s):// и путём — лишнее обрежется. Для домена автоматически добавляются и поддомены. Примеры: <code>ozon.ru</code>, <code>*.example.com</code>, <code>192.168.0.0/16</code>, <code>&lt;local&gt;</code>.</p>
       <textarea id="bypassInput" rows="5"></textarea>
       <button id="saveBypass" class="btn">💾 Сохранить исключения</button>
     </section>
