@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Proxy Switcher Pro",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Управление множеством прокси (HTTP/HTTPS/SOCKS5): быстрый выбор, вкл/выкл для всего браузера, исключения и настройки.",
   "permissions": ["proxy", "storage", "tabs", "webRequest", "webRequestAuthProvider"],
   "host_permissions": ["<all_urls>"],

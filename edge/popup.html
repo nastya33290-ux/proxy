@@ -29,10 +29,12 @@
   </div>
 
   <footer class="ftr">
-    <button id="openOptions" class="btn ghost">⚙ Настройки</button>
-    <button id="randomProxy" class="btn ghost" title="Включить случайный прокси">🎲</button>
-    <button id="checkIp" class="btn ghost" title="Проверить мой IP">🌍 IP</button>
-    <span id="activeInfo" class="active-info"></span>
+    <div class="active-info" id="activeInfo"></div>
+    <div class="btn-row">
+      <button id="openOptions" class="btn ghost">⚙ Настройки</button>
+      <button id="randomProxy" class="btn ghost icon-btn" title="Включить случайный прокси">🎲</button>
+      <button id="checkIp" class="btn ghost icon-btn" title="Проверить мой IP">🌍 IP</button>
+    </div>
   </footer>
 
   <script src="popup.js"></script>

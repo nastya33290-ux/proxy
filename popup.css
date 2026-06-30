@@ -67,13 +67,21 @@ input:checked + .slider:before { transform: translateX(20px); }
 .hidden { display: none; }
 
 .ftr {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; flex-direction: column; gap: 8px;
   padding: 10px 14px; border-top: 1px solid #334155; background: #1e293b;
 }
+.btn-row { display: flex; gap: 8px; align-items: stretch; }
 .btn {
-  cursor: pointer; border: none; padding: 7px 12px; border-radius: 8px;
+  cursor: pointer; border: none; border-radius: 8px;
   font-size: 13px; color: #fff; background: #3b82f6;
+  height: 34px; display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 12px; white-space: nowrap; line-height: 1;
 }
 .btn.ghost { background: #334155; }
 .btn:hover { opacity: .9; }
-.active-info { font-size: 12px; color: #94a3b8; max-width: 150px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#openOptions { flex: 1; }
+.icon-btn { padding: 0 12px; }
+.active-info {
+  font-size: 12px; color: #94a3b8; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
