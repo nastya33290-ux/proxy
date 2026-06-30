@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="options.css" />
+  <title>Настройки — Proxy Switcher Pro</title>
+</head>
+<body>
+  <div class="container">
+    <h1>⚡ Proxy Switcher Pro</h1>
+    <p class="lead">Управление прокси-серверами, исключениями и настройками.</p>
+
+    <section class="card">
+      <h2>Добавить / изменить прокси</h2>
+      <form id="proxyForm" class="grid">
+        <input type="hidden" id="editId" />
+        <label>Название
+          <input type="text" id="name" placeholder="Мой прокси" />
+        </label>
+        <label>Тип
+          <select id="type">
+            <option value="http">HTTP</option>
+            <option value="https">HTTPS</option>
+            <option value="socks5">SOCKS5</option>
+            <option value="socks4">SOCKS4</option>
+          </select>
+        </label>
+        <label>Хост / IP *
+          <input type="text" id="host" placeholder="123.45.67.89" required />
+        </label>
+        <label>Порт *
+          <input type="number" id="port" placeholder="8080" min="1" max="65535" required />
+        </label>
+        <label>Логин (необязательно)
+          <input type="text" id="username" placeholder="user" autocomplete="off" />
+        </label>
+        <label>Пароль (необязательно)
+          <input type="password" id="password" placeholder="••••" autocomplete="off" />
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn">💾 Сохранить</button>
+          <button type="button" id="cancelEdit" class="btn ghost hidden">Отмена</button>
+        </div>
+      </form>
+      <div class="paste-box">
+        <h3>Быстрое добавление списком</h3>
+        <p class="hint">Формат строки: <code>type://[user:pass@]host:port</code> или <code>host:port:user:pass</code>. По одной на строку.</p>
+        <textarea id="bulkInput" rows="3" placeholder="socks5://user:pass@1.2.3.4:1080&#10;http://9.8.7.6:3128"></textarea>
+        <button id="bulkAdd" class="btn">➕ Импортировать список</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row-between">
+        <h2>Список прокси (<span id="count">0</span>)</h2>
+        <div>
+          <button id="exportBtn" class="btn ghost">⬇ Экспорт</button>
+          <button id="importBtn" class="btn ghost">⬆ Импорт JSON</button>
+          <input type="file" id="importFile" accept="application/json" class="hidden" />
+        </div>
+      </div>
+      <table class="tbl">
+        <thead>
+          <tr><th></th><th>Название</th><th>Тип</th><th>Адрес</th><th>Авторизация</th><th>Действия</th></tr>
+        </thead>
+        <tbody id="proxyTable"></tbody>
+      </table>
+      <p id="noProxies" class="hint">Пока нет прокси.</p>
+    </section>
+
+    <section class="card">
+      <h2>Исключения (bypass)</h2>
+      <p class="hint">Эти адреса будут открываться напрямую, минуя прокси. По одному правилу на строку. Поддерживаются домены, IP, маски: <code>*.example.com</code>, <code>192.168.0.0/16</code>, <code>&lt;local&gt;</code>.</p>
+      <textarea id="bypassInput" rows="5"></textarea>
+      <button id="saveBypass" class="btn">💾 Сохранить исключения</button>
+    </section>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>

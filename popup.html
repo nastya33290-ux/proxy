@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="popup.css" />
+  <title>Proxy Switcher Pro</title>
+</head>
+<body>
+  <header class="hdr">
+    <div class="title">
+      <span class="dot" id="statusDot"></span>
+      <span>Proxy Switcher</span>
+    </div>
+    <label class="switch" title="Включить/выключить прокси">
+      <input type="checkbox" id="masterToggle" />
+      <span class="slider"></span>
+    </label>
+  </header>
+
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Поиск прокси..." />
+  </div>
+
+  <ul id="proxyList" class="list"></ul>
+
+  <div id="empty" class="empty hidden">
+    <p>Нет добавленных прокси.</p>
+  </div>
+
+  <footer class="ftr">
+    <button id="openOptions" class="btn ghost">⚙ Настройки</button>
+    <span id="activeInfo" class="active-info"></span>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
