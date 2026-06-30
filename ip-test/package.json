@@ -1,0 +1,9 @@
+{
+  "name": "ip-test",
+  "version": "1.0.0",
+  "description": "Мини-сайт для проверки IP и страны (без внешних библиотек)",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}

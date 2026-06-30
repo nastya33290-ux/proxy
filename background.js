@@ -41,35 +41,68 @@ async function getState() {
 }
 
 // Convert user-entered exceptions into valid Chrome bypass patterns.
-// Handles entries like "https://ozon.ru/path", "www.ozon.ru", "ozon.ru".
-// For a bare domain we add both the domain AND a wildcard for subdomains.
+// Very tolerant: accepts schemes, paths, ports, commas/spaces as separators,
+// drops anything invalid so a single bad entry never breaks the whole proxy.
 function normalizeBypass(list) {
   const out = new Set();
+  const pieces = [];
+
   (list || []).forEach((raw) => {
-    let e = String(raw).trim();
+    // allow separating by newlines (already split), commas, semicolons, spaces, tabs
+    String(raw)
+      .split(/[\s,;]+/)
+      .forEach((p) => pieces.push(p));
+  });
+
+  pieces.forEach((rawEntry) => {
+    let e = String(rawEntry).trim().toLowerCase();
     if (!e) return;
-    // strip scheme
-    e = e.replace(/^[a-z0-9]+:\/\//i, "");
+
+    // strip scheme like http:// https:// socks5://
+    e = e.replace(/^[a-z0-9+.-]+:\/\//, "");
+    // strip credentials user:pass@
+    e = e.replace(/^[^@/]*@/, "");
     // strip path / query / hash
     e = e.split(/[/?#]/)[0];
     // strip leading dots
     e = e.replace(/^\.+/, "");
     if (!e) return;
 
-    // keep special tokens, CIDR, IP, and already-wildcarded entries as-is
-    const isSpecial = e === "<local>";
+    const special = e === "<local>" || e === "<-loopback>";
+    const isCidr = /^[0-9a-f:.]+\/\d{1,3}$/.test(e);
     const isWildcard = e.startsWith("*");
-    const isCidr = e.includes("/");
-    const isIp = /^[0-9.:]+$/.test(e);
-    const hasPort = /:\d+$/.test(e);
+    // split optional :port for validation
+    const m = e.match(/^([^:]+|\[[^\]]+\])(?::(\d{1,5}))?$/);
 
-    out.add(e);
+    if (special) {
+      out.add(e);
+      return;
+    }
+    if (isCidr) {
+      out.add(e);
+      return;
+    }
+    if (!m) {
+      // unrecognized shape, skip silently so it can't break the config
+      return;
+    }
 
-    if (!isSpecial && !isWildcard && !isCidr && !isIp && !hasPort) {
-      // also match all subdomains: ozon.ru -> *.ozon.ru
-      out.add("*." + e);
+    const host = m[1];
+    const port = m[2];
+    const hostPort = port ? `${host}:${port}` : host;
+
+    // validate host chars: letters, digits, dot, dash, *, brackets/colon for IPv6
+    if (!/^[a-z0-9.\-*\[\]:]+$/.test(host)) return;
+
+    out.add(hostPort);
+
+    // For a plain domain (not IP, not wildcard, not IPv6), also match subdomains
+    const isIp = /^[0-9.]+$/.test(host) || host.includes("[") || host.includes("::");
+    if (!isWildcard && !isIp && host.includes(".")) {
+      out.add(port ? `*.${host}:${port}` : `*.${host}`);
     }
   });
+
   return Array.from(out);
 }
 
@@ -80,12 +113,16 @@ function buildConfig(proxy, bypassList) {
     host: proxy.host,
     port: Number(proxy.port)
   };
-  const normalized = normalizeBypass(bypassList);
+  let normalized = normalizeBypass(bypassList);
+  // always keep loopback safe
+  ["localhost", "127.0.0.1", "<local>"].forEach((d) => {
+    if (!normalized.includes(d)) normalized.push(d);
+  });
   return {
     mode: "fixed_servers",
     rules: {
       singleProxy: single,
-      bypassList: normalized.length ? normalized : DEFAULT_BYPASS
+      bypassList: normalized
     }
   };
 }
@@ -105,7 +142,14 @@ async function applyProxy() {
   }
 
   const config = buildConfig(proxy, bypass);
-  await chrome.proxy.settings.set({ value: config, scope: "regular" });
+  try {
+    await chrome.proxy.settings.set({ value: config, scope: "regular" });
+  } catch (err) {
+    console.error("Failed to set proxy, retrying without bypass:", err);
+    // Fallback: apply proxy with only safe defaults so it never breaks
+    const safe = buildConfig(proxy, []);
+    await chrome.proxy.settings.set({ value: safe, scope: "regular" });
+  }
 
   // Handle auth if credentials present
   setupAuth(proxy);
